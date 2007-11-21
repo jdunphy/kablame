@@ -1,0 +1,8 @@
+= Kablame 0.0.5
+
+So who really gets bragging rights?
+
+
+== Description
+
+Find out how many lines of test code each SVN contributor added, according to the almighty blame.
