@@ -6,11 +6,10 @@ class Kablame
   
   def kablame
     folders.each do |directory|
-      
       if File.exists?(directory) 
         puts "Processing #{directory}"
-        Dir.new(directory).entries.grep(file_format_regex).each do |filename|
-          process_file(directory +'/'+ filename)
+        Dir.glob(directory+"/**/*").grep(file_format_regex).each do |filename|
+          process_file(filename)
         end
       else
         puts "#{directory} not found. Skipping it!"
