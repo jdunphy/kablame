@@ -7,7 +7,7 @@ class Kablame
   def kablame
     folders.each do |directory|
       if File.exists?(directory) 
-        puts "Kablaming #{directory}"
+        puts "\nKablaming #{directory}"
         Dir.glob(directory+"/**/*").grep(file_format_regex).each do |filename|
           process_file(filename)
         end
@@ -20,10 +20,19 @@ class Kablame
     else
       puts "No results.  Write some #{type.pluralize}!"
     end
+  end 
+  
+  def process_file(filename)
+    print '.'
+    STDOUT.flush
+    get_blame_lines(filename).each do |line|
+      name = line.match(name_match_regex)[1]  
+      (@users[name] ? @users[name].increment : @users[name] = KablameUser.new(name)) unless name.nil?
+    end
   end
   
   def print_results
-    puts "++++++++++++TOTALS++++++++++++"
+    puts "\n\n++++++++++++TOTALS++++++++++++"
     puts "**WINNER** #{@users.values.sort.first.name} **WINNER**"
     @users.values.sort.each do |user|
       puts user.to_s
@@ -46,24 +55,18 @@ class Kablame
 end
 
 module Svn
-  def process_file(filename)
-    lines = (`svn blame #{filename}`).split("\n")
-    puts "\t #{filename} -- #{lines.length} lines"
-    lines.each do |line|
-      name = line.match(/\d+[\ ]+(\w+)/)[1]
-      (@users[name] ? @users[name].increment : @users[name] = KablameUser.new(name)) unless name.nil?
-    end
-  end  
+  def name_match_regex; /\d+[\ ]+(\w+)/; end
+ 
+  def get_blame_lines(filename)
+    `svn blame #{filename}`.split("\n")
+  end
 end
 
-module Git
-  def process_file(filename)
-    lines = (`git blame #{filename}`).split("\n")
-    puts "\t #{filename} -- #{lines.length} lines"
-    lines.each do |line|
-      name = line.match(/\((\w+)\s/)[1]  
-      (@users[name] ? @users[name].increment : @users[name] = KablameUser.new(name)) unless name.nil?
-    end
+module Git 
+  def name_match_regex; /\((\w+)\s/; end
+  
+  def get_blame_lines(filename)
+    `git blame #{filename}`.split("\n")
   end  
 end
 
