@@ -18,7 +18,7 @@ class Kablame
     unless(@users.empty?)
       print_results 
     else
-      puts "No results.  Write some #{type.pluralize}!"
+      puts "No results.  Write some #{type}!"
     end
   end 
   
@@ -37,7 +37,8 @@ class Kablame
     @users.values.sort.each do |user|
       puts user.to_s
     end 
-    puts "**LOSER** #{@users.values.sort.last.name} **LOSER**"   
+    puts "**LOSER** #{@users.values.sort.last.name} **LOSER**"
+    puts @info if @info
   end
     
   
@@ -60,6 +61,8 @@ module Svn
   def get_blame_lines(filename)
     `svn blame #{filename}`.split("\n")
   end
+
+  def version_control; 'svn'; end
 end
 
 module Git 
@@ -67,7 +70,9 @@ module Git
   
   def get_blame_lines(filename)
     `git blame #{filename}`.split("\n")
-  end  
+  end
+  
+  def version_control; 'git'; end
 end
 
 class TestKablame < Kablame
@@ -79,7 +84,7 @@ class TestKablame < Kablame
     /\.rb/ 
   end
   
-  def type; "test"; end
+  def type; "tests"; end
 end
 
 class SpecKablame < Kablame
@@ -91,7 +96,30 @@ class SpecKablame < Kablame
     /\.rb/ 
   end
   
-  def type; "spec"; end
+  def type; "specs"; end
+end
+
+class GeneralKablame < Kablame 
+  
+  def initialize(dirs, formats)
+    @folders = dirs ? dirs.split : %w{app lib}
+    @formats = formats ? formats.split : %w{rb r?html}
+    @info = "To get more detailed information use kablame:svn
+  Specify a set of directories and/or file formats
+  rake kablame:#{version_control}  DIRS='app config' FORMATS='html xml'"  
+    
+    super()
+  end
+  
+   def folders 
+     @folders
+   end
+   
+   def file_format_regex
+     %r{\.(#{@formats.join('|')})}
+   end
+   
+   def type; "stuff"; end
 end
 
 class KablameUser
