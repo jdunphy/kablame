@@ -108,7 +108,7 @@ class KablameUser
   end
 
   def to_s
-    "#{@name.ljust(20)} ==> #{@line_count}"
+    "#{@name.ljust(20)} ==> #{@line_count.to_s.rjust(4)}"
   end
 
   def increment
