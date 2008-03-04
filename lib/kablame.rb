@@ -26,6 +26,7 @@ class Kablame
     print '.'
     STDOUT.flush
     get_blame_lines(filename).each do |line|
+      next if line.match(blank_line_regex)
       name = line.match(name_match_regex)[1]  
       (@users[name] ? @users[name].increment : @users[name] = KablameUser.new(name)) unless name.nil?
     end
@@ -56,6 +57,8 @@ class Kablame
 end
 
 module Svn
+  def blank_line_regex; /\d+[\ ]+(\w+)+(\s+)$/; end
+  
   def name_match_regex; /\d+[\ ]+(\w+)/; end
  
   def get_blame_lines(filename)
@@ -66,6 +69,8 @@ module Svn
 end
 
 module Git 
+  def blank_line_regex; /\(.+[\+-]\d{4}\s+\d+\)(\s*)$/; end
+  
   def name_match_regex; /\((\w+)\s/; end
   
   def get_blame_lines(filename)
